@@ -31,6 +31,26 @@
 // first batch of planted bombs, determine the state of the grid after N
 // seconds.
 
+// For example, if the initial grid looks like:
+
+// ...
+// .O.
+// ...
+
+// it looks the same after the first second. After the second second, Bomberman
+// has placed all his charges:
+
+// OOO
+// OOO
+// OOO
+
+// At the third second, the bomb in the middle blows up, emptying all
+// surrounding cells:
+
+// O.O
+// ...
+// O.O
+
 function bomberMan(n, grid) {
   const rows = grid.length;
   const columns = grid[0].length;
