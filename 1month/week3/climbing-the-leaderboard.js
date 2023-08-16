@@ -38,14 +38,23 @@ function climbingLeaderboard(ranked, player) {
     } else {
       if (currentRankedScore < previousScore) currentPosition++;
       previousScore = currentRankedScore;
-      if (i === ranked.length - 1) playerRankings.push(currentPosition + 1);
+      if (i === ranked.length - 1) {
+        playerRankings.push(currentPosition + 1);
+        playerScores.pop();
+      }
     }
+
+    if (!playerScores[0]) break;
   }
 
   return playerRankings.reverse();
 }
 
-// Intended version:
+// Intended version, which works for all test cases (with +10000 elements) but
+// 1, with 200 ranked length and 100 player length. Debugging shows that from
+// the third element the loop gets stuck on the same i value, even accessing the
+// conditional currentPlayerScore <= currentRankedScore. I have no idea why,
+// and can't find a solution.
 
 function climbingLeaderboard(ranked, player) {
   const scoreSet = new Set();
@@ -66,13 +75,46 @@ function climbingLeaderboard(ranked, player) {
     if (currentRankedScore > previousRankedScore) currentPosition--;
 
     if (currentPlayerScore <= currentRankedScore) {
-      if (currentPlayerScore === currentRankedScore) currentPosition--;
-      playerRankings.push(currentPosition + 1);
+      currentPlayerScore === currentRankedScore
+        ? playerRankings.push(currentPosition)
+        : playerRankings.push(currentPosition + 1);
       playerScores.pop();
       i++;
     } else {
-      previousRankedScore = currentRankedScore;
-      if (i === 0) playerRankings.push(currentPosition + 1);
+      if (i === 0) {
+        playerRankings.push(currentPosition);
+        playerScores.pop();
+      }
+    }
+
+    previousRankedScore = currentRankedScore;
+    if (!playerScores[0]) break;
+  }
+
+  return playerRankings;
+}
+
+// ...so I asked ChatGPT, and tried to debug it together. ChatGPT couldn't
+// figure out what the bug was either, but it provided me with a different
+// (and cleaner) implementation that works:
+
+function climbingLeaderboard(ranked, player) {
+  const distinctRanked = [...new Set(ranked)];
+  const playerRankings = [];
+
+  let rankIndex = distinctRanked.length - 1;
+
+  for (const playerScore of player) {
+    while (rankIndex >= 0 && playerScore >= distinctRanked[rankIndex]) {
+      rankIndex--;
+    }
+
+    if (rankIndex === -1) {
+      playerRankings.push(1);
+    } else if (playerScore === distinctRanked[rankIndex]) {
+      playerRankings.push(rankIndex + 1);
+    } else {
+      playerRankings.push(rankIndex + 2);
     }
   }
 
